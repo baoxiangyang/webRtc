@@ -1,141 +1,26 @@
 <%- include header.html %>
+<script src="/public/js/chat.js" type="text/javascript" charset="utf-8"></script>
+<style type="text/css" media="screen">
+    .mian {
+        height: 100%;
+    }
+</style>
+</head>
 <body>
-    
-</body>
-<script type="text/javascript">
-    var RTCPeerConnection = window.RTCPeerConnection || window.mozRTCPeerConnection || window.webkitRTCPeerConnection,
-        RTCSessionDescription = window.RTCSessionDescription || window.mozRTCSessionDescription || window.webkitRTCSessionDescription, stdout = null, pcJson = {};
-    navigator.getUserMedia = navigator.getUserMedia ||  navigator.webkitGetUserMedia|| navigator.mozGetUserMedia;
-    var iceServer = {
-            "iceServers": [{
-                "url": "stun:stun.l.google.com:19302"
-            }, {
-                "url": "turn:numb.viagenie.ca",
-                "username": "webrtc@live.com",
-                "credential": "muazkh"
-            }]
-        },
-        socket = new WebSocket("ws://"+window.location.host+'/chat.html?room='+window.location.hash.slice(1)),
-        getMedias = new Promise(function(resolve, reject){
-            navigator.getUserMedia({
-                audio: true,
-                video: true
-            }, function(stream){
-                stdout = stream;
-                resolve();
-            }, function(error){
-                alert('获取摄像头失败');
-                reject(error);
-                console.log('getUserMedia error: ' + error);
-            });
-        });
-        socket.onmessage = function(event){
-            var json = JSON.parse(event.data);
-            switch (json.type){
-                case 'name':
-                    /*getMedias.then(function(){
-                        var peer = peerOffer(json);
-                        pcJson[json.name] = peer;  
-                    })*/
-                     var peer = peerOffer(json);
-                    pcJson[json.name] = peer; 
-                    break;
-                case 'ice':
-                    pcJson[json.name].addIceCandidate(new RTCIceCandidate(json.data.candidate));
-                    break;
-                case 'peer':
-                    if(json.data.sdp.type == 'answer'){
-                        pcJson[json.name].setRemoteDescription(new RTCSessionDescription(json.data.sdp));
-                    }else if(json.data.sdp.type == "offer") {
-                        /*getMedias.then(function(){
-                            var peer = peerAnswer(json);
-                            peer.name = json.name;
-                            pcJson[json.name] = peer; 
-                        })*/
-                        var peer = peerAnswer(json);
-                        peer.name = json.name;
-                        pcJson[json.name] = peer; 
-                    }
-                    break;
-                case 'close':
-                    pcJson[json.name].close();
-                    delete pcJson[json.name];
-                    document.getElementById(json.name).style.display = 'none';
-                default:
-                    console.log(event.data);
-            }
-        };
-    function socSend(json){
-        socket.send(JSON.stringify(json));
-    }
-    socket.onerror = function(error){
-        console.log(error)
-    }
-    function peerOffer(json){
-        var pc = new RTCPeerConnection(iceServer);
-        if(stdout){
-            pc.addStream(stdout); 
-        }
-        pc.createOffer(function(desc){
-            pc.setLocalDescription(desc);
-            socSend({ 
-                "type": "peer",
-                "data": {
-                    "sdp": desc
-                },
 
-            })
-        },function(err){
-            console.log(err)
-        })
-        pc.onaddstream = function(event){
-            var body = document.getElementsByTagName('body')[0],
-            video  = document.createElement('video');
-            video.id = json.name
-            video.src = URL.createObjectURL(event.stream);
-            video.play();
-            body.appendChild(video)
-        };
-        return pc;
-    }
-    function peerAnswer(json){
-        var pc = new RTCPeerConnection(iceServer);
-        if(stdout){
-            pc.addStream(stdout); 
-        }
-        pc.onaddstream = function(event){
-            var body = document.getElementsByTagName('body')[0],
-            video  = document.createElement('video');
-            video.id = json.name;
-            video.src = URL.createObjectURL(event.stream);
-            video.play();
-            body.appendChild(video)
-        };
-        pc.setRemoteDescription(new RTCSessionDescription(json.data.sdp));
-        pc.onicecandidate = function(event){
-            if (event.candidate !== null) {
-               socSend({
-                    "type": "ice",
-                    "data": {
-                        "candidate": event.candidate
-                    },
-                    name:json.name
-                })
-            }
-        };
-        pc.createAnswer(function(desc){
-            pc.setLocalDescription(desc);
-            socSend({
-                "type": "peer",
-                "data": {
-                    "sdp": desc
-                },
-                name:json.name
-            })
-        },function(error){
-            console.log(error)
-        });
-        return pc;
-    }
-</script>
-</html>
+<div class="container-fluid mian">
+ <%- include nav.html %>
+    <div class="row">
+        <div class="col-md-4 col-xs-6">
+            <div class='liaotian'>
+                
+            </div>
+        </div>
+        <div class="col-xs-6 col-md-8">
+            <div class="videos">
+                
+            </div>
+        </div>
+    </div>
+</div>
+<%- include footer.html %>

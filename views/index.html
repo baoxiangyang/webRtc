@@ -11,6 +11,9 @@
 	.dl-horizontal dd{
 		margin-left: 55px;
 	}
+	.panel-default {
+	    cursor: pointer ;
+	}
 </style>
 <script src="/public/js/index.js" type="text/javascript" charset="utf-8" async defer></script>
 </head>
@@ -36,7 +39,7 @@
 							  <dt>创建者: </dt>
 							  <dd><%= roomList[i].roomCreate %></dd>
 							  <dt>类 型: </dt>
-							  <dd>
+							  <dd roomType="<%= roomList[i].roomType %>">
 							  	<% if(roomList[i].roomType == 1){ %>
 							  		多人聊天
 							  	<%  }else{ %>
@@ -44,7 +47,7 @@
 							  	<% } %>
 							  </dd>
 							  <dt>房 号: </dt>
-							  <dd><%= i %></dd>
+							  <dd class="roomId"><%= i %></dd>
 							</dl>
 					  	</div>
 					</div>

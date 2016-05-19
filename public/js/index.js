@@ -63,4 +63,13 @@ $(function(){
 			}
 		}) 
 	})
+	$('.panel-default').click(function(event){
+		var room = $(this).find('.roomId').text(),
+				roomType = $(this).find('[roomType]').attr('roomType');
+		if(roomType == 1){
+			window.location.href = '/chat.html#'+room;
+		}else{
+			window.location.href = '/live.html#'+room;
+		}
+	})
 })

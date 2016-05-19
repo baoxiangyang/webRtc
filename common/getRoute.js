@@ -18,7 +18,7 @@ module.exports = function(req, res){
 				})
 				break;
 			case (paths == '/chat.html'):
-				myEjs('chat', {} ,function(html){
+				myEjs('chat', {name: nameJson[req.cookies.name]} ,function(html){
 					res.writeHead(200,{'Content-type':'text/html'});
 					res.end(html);
 				})

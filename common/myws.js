@@ -56,6 +56,7 @@ module.exports = function(server){
 	        console.log('error',error)
 	    })
 	    ws.on('close', function(){
+	    	var wsJson = roomJson[data.room].wsJson;
 	        delete wsJson[ws.name];
 	        for(var i in wsJson){
 	            if(wsJson[i] != ws){
