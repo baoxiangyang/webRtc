@@ -2,19 +2,48 @@
 <script src="/public/js/chat.js" type="text/javascript" charset="utf-8"></script>
 <style type="text/css" media="screen">
     .mian {
-        height: 100%;
+        display: flex;
+        display: -webkit-flex;
+        display: -ms-flex;
+        flex-direction: column;
+        -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+    }
+    .mian > .row {
+        flex: 1;
+        -webkit-flex: 1;
+        -ms-flex:1;
+        display: flex;
+        display: -webkit-flex;
+        display: -ms-flex;
+    }
+    .chat {
+        max-height: 700px;
+        overflow-y:scroll; 
     }
 </style>
 </head>
 <body>
-
 <div class="container-fluid mian">
- <%- include nav.html %>
+    <%- include nav.html %>
     <div class="row">
         <div class="col-md-4 col-xs-6">
-            <div class='liaotian'>
-                
+            <div class='chat'>
+                <div></div>
             </div>
+            <form class="form-inline" style="position: absolute;bottom: 10px">
+                <div class="form-group">
+                    <select class="form-control" id='names'>
+                        <option value="" >全部</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="sr-only"></label>
+                    <input type="text" class="form-control" placeholder="文字">
+                </div>
+                <button type="submit" class="btn btn-default">发送</button>
+                <button type="button" class="btn btn-default">加入聊天室</button>
+            </form>
         </div>
         <div class="col-xs-6 col-md-8">
             <div class="videos">

@@ -1,9 +1,9 @@
 $(function(){
-	$('body').height($(document).height());
-var RTCPeerConnection = window.RTCPeerConnection || window.mozRTCPeerConnection || window.webkitRTCPeerConnection,
-      RTCSessionDescription = window.RTCSessionDescription || window.mozRTCSessionDescription || window.webkitRTCSessionDescription, stdout = null, pcJson = {};
+  $('.mian').height($(document).height());
+  var RTCPeerConnection = window.RTCPeerConnection || window.mozRTCPeerConnection || window.webkitRTCPeerConnection,
+      RTCSessionDescription = window.RTCSessionDescription || window.mozRTCSessionDescription || window.webkitRTCSessionDescription, stdout = null; window.pcJson = {}; window.dataChannelJson = {};
       navigator.getUserMedia = navigator.getUserMedia ||  navigator.webkitGetUserMedia|| navigator.mozGetUserMedia;
-var iceServer = {
+  var iceServer = {
       "iceServers": [{
           "url": "stun:stun.l.google.com:19302"
       }, {
@@ -12,8 +12,8 @@ var iceServer = {
           "credential": "muazkh"
       }]
   },
-  socket = new WebSocket("ws://"+window.location.host+'/chat.html?room='+window.location.hash.slice(1)),
-  getMedias = new Promise(function(resolve, reject){
+  socket = new WebSocket("ws://"+window.location.host+'/chat.html?room='+window.location.hash.slice(1));
+  /*getMedias = new Promise(function(resolve, reject){
       navigator.getUserMedia({
           audio: true,
           video: true
@@ -25,11 +25,13 @@ var iceServer = {
           reject(error);
           console.log('getUserMedia error: ' + error);
       });
-  });
+  });*/
   socket.onmessage = function(event){
       var json = JSON.parse(event.data);
       switch (json.type){
           case 'name':
+              window.nameJson[json.name] = json.nick; 
+              $('#names').append('<option value="'+json.name+'">'+json.nick+'</option>');
               var peer = peerOffer(json);
               pcJson[json.name] = peer; 
               break;
@@ -38,7 +40,7 @@ var iceServer = {
               break;
           case 'peer':
               if(json.data.sdp.type == 'answer'){
-                  pcJson[json.name].setRemoteDescription(new RTCSessionDescription(json.data.sdp));
+                pcJson[json.name].setRemoteDescription(new RTCSessionDescription(json.data.sdp));
               }else if(json.data.sdp.type == "offer") {
                   var peer = peerAnswer(json);
                   peer.name = json.name;
@@ -48,9 +50,18 @@ var iceServer = {
           case 'close':
               pcJson[json.name].close();
               delete pcJson[json.name];
-              document.getElementById(json.name).style.display = 'none';
+              //document.getElementById(json.name).style.display = 'none';
+              break;
+          case 'nameJson':
+            window.nameJson = json.namejson;
+            var options= $(document.createDocumentFragment());
+            for(var i in nameJson){
+              options.append('<option value="'+i+'">'+nameJson[i]+'</option>');
+            }
+            $('#names').append(options);
+            break
           default:
-              console.log(event.data);
+            console.log(event.data);
       }
   };
   function socSend(json){
@@ -64,13 +75,7 @@ var iceServer = {
     if(stdout){
         pc.addStream(stdout); 
     }
-    pc.dataChannel =  pc.createDataChannel("myLabel");
-    pc.dataChannel.onerror = function (error) {
-      console.log("Data Channel Error:", error);
-    };
-    pc.dataChannel.onopen = function () {
-       console.log('hello world');
-    };
+    createDataChannel(pc,json)
     pc.createOffer(function(desc){
         pc.setLocalDescription(desc);
         socSend({ 
@@ -84,12 +89,13 @@ var iceServer = {
         console.log(err)
     })
     pc.onaddstream = function(event){
-        var body = document.getElementsByTagName('body')[0],
+        /*var body = document.getElementsByTagName('body')[0],
         video  = document.createElement('video');
         video.id = json.name
         video.src = URL.createObjectURL(event.stream);
         video.play();
-        body.appendChild(video)
+        body.appendChild(video)*/
+        console.log(event)
     };
     return pc;
   }
@@ -98,20 +104,15 @@ var iceServer = {
 	  if(stdout){
 	      pc.addStream(stdout); 
 	  }
-	  pc.dataChannel =  pc.createDataChannel("myLabel");
-	  pc.dataChannel.onerror = function (error) {
-	    console.log("Data Channel Error:", error);
-	  };
-	  pc.dataChannel.onopen = function () {
-	     console.log('hello world');
-	  };
+    createDataChannel(pc,json)
 	  pc.onaddstream = function(event){
-	      var body = document.getElementsByTagName('body')[0],
+	      /*var body = document.getElementsByTagName('body')[0],
 	      video  = document.createElement('video');
 	      video.id = json.name;
 	      video.src = URL.createObjectURL(event.stream);
 	      video.play();
-	      body.appendChild(video)
+	      body.appendChild(video);*/
+        console.log(event)
 	  };
 	  pc.setRemoteDescription(new RTCSessionDescription(json.data.sdp));
 	  pc.onicecandidate = function(event){
@@ -138,5 +139,18 @@ var iceServer = {
 	      console.log(error)
 	  });
 	  return pc;
-	  }
+	}
+  function createDataChannel(pc,json){
+    var dataChannel =  pc.createDataChannel(json.name,{ordered: false, maxRetransmitTime: 3000});
+    dataChannel.onerror = function (error) {
+      console.log("Data Channel Error:", error);
+    };
+    dataChannel.onopen = function (event) {
+      console.log('hello world');
+    };
+    dataChannel.onmessage = function(event){
+      console.log(event);
+    }
+    dataChannelJson[json.name] = dataChannel;
+  }
 })

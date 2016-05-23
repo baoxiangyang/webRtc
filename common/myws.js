@@ -20,8 +20,20 @@ module.exports = function(server){
 	        if(roomJson[data.room].wsJson[i] != ws){
 	            roomJson[data.room].wsJson[i].send(JSON.stringify({
 	                type:'name',
-	                name:ws.name
+	                name:ws.name,
+	                nick: nameJson[ws.name]
 	            }));
+	        }else{
+	        	var nameData = {};
+	        	for(var i in roomJson[data.room].wsJson){
+	        		if(i != ws.name){
+									nameData[i] = nameJson[i]
+	        		}
+	        	}
+	        	ws.send(JSON.stringify({
+	        		type:'nameJson',
+	        		namejson:nameData
+	        	}))
 	        }
 	    }
 	    ws.on('message', function(data){
