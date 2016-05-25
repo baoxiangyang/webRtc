@@ -11,7 +11,7 @@ module.exports = function(req,res){
 				resEnd({state:-1, msg:'该用户名已存在请重新输入'})
 			}else{
 				nameJson[req.bodys.name] = req.bodys.nick;
-				resEnd({state:1}, null, {'Content-type':'text/plain','Set-Cookie':['name='+req.bodys.name+';HttpOnly=true','aa=cc']});
+				resEnd({state:1}, null, {'Content-type':'text/plain','Set-Cookie':['name='+req.bodys.name+';HttpOnly=true']});
 			}		
 			break;
 		case '/createRoom':

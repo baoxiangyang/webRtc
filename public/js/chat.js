@@ -71,7 +71,7 @@ $(function(){
       console.log(error)
   }
   function peerOffer(json){
-    var pc = new RTCPeerConnection(iceServer);
+    var pc = new RTCPeerConnection(iceServer,null);
     if(stdout){
         pc.addStream(stdout); 
     }
@@ -88,6 +88,9 @@ $(function(){
     },function(err){
         console.log(err)
     })
+    pc.ondatachannel = function(event){
+      console.log('333')
+    }
     pc.onaddstream = function(event){
         /*var body = document.getElementsByTagName('body')[0],
         video  = document.createElement('video');
@@ -100,7 +103,7 @@ $(function(){
     return pc;
   }
   function peerAnswer(json){
-  var pc = new RTCPeerConnection(iceServer);
+  var pc = new RTCPeerConnection(iceServer,null);
 	  if(stdout){
 	      pc.addStream(stdout); 
 	  }
@@ -138,18 +141,44 @@ $(function(){
 	  },function(error){
 	      console.log(error)
 	  });
+    pc.ondatachannel = function(event){
+      console.log('333',event);
+      var dataChannel = event.channel;
+      
+      dataChannel.onmessage = function(event){
+        console.log(event)
+      }
+      dataChannel.onclose = function(event){
+        console.log('close')
+      }
+      dataChannel.onopen = function(event){
+        dataChannel.send('123');
+        console.log('onopen')
+      }
+    }
 	  return pc;
 	}
   function createDataChannel(pc,json){
-    var dataChannel =  pc.createDataChannel(json.name,{ordered: false, maxRetransmitTime: 3000});
+    var dataChannel =  pc.createDataChannel(json.name,{reliable: false});
     dataChannel.onerror = function (error) {
       console.log("Data Channel Error:", error);
     };
     dataChannel.onopen = function (event) {
+      dataChannel.send('11111');
       console.log('hello world');
     };
+    dataChannel.onclose = function(){
+      delete dataChannelJson[this.label]
+      console.log('close');
+    };
+    dataChannel.onbufferedamountlow = function(){
+      console.log('onbufferedamountlow');
+    };
+    dataChannel.ordered = function(){
+      console.log('ordered');
+    }
     dataChannel.onmessage = function(event){
-      console.log(event);
+      console.log(event,2222);
     }
     dataChannelJson[json.name] = dataChannel;
   }
