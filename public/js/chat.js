@@ -88,9 +88,6 @@ $(function(){
     },function(err){
         console.log(err)
     })
-    pc.ondatachannel = function(event){
-      console.log('333')
-    }
     pc.onaddstream = function(event){
         /*var body = document.getElementsByTagName('body')[0],
         video  = document.createElement('video');
@@ -100,6 +97,18 @@ $(function(){
         body.appendChild(video)*/
         console.log(event)
     };
+    pc.ondatachannel = function(event){
+      var dataChannel = event.channel;  
+      dataChannel.onmessage = function(event){
+        console.log(event,'peerOffer')
+      }
+      dataChannel.onbufferedamountlow = function(){
+        console.log('onbufferedamountlow');
+      };
+      dataChannel.ordered = function(){
+        console.log('ordered');
+      }
+    }
     return pc;
   }
   function peerAnswer(json){
@@ -142,22 +151,20 @@ $(function(){
 	      console.log(error)
 	  });
     pc.ondatachannel = function(event){
-      console.log('333',event);
-      var dataChannel = event.channel;
-      
+      var dataChannel = event.channel;  
       dataChannel.onmessage = function(event){
-        console.log(event)
+        console.log(event,'peerAnswer')
       }
-      dataChannel.onclose = function(event){
-        console.log('close')
-      }
-      dataChannel.onopen = function(event){
-        dataChannel.send('123');
-        console.log('onopen')
+      dataChannel.onbufferedamountlow = function(){
+      console.log('onbufferedamountlow');
+      };
+      dataChannel.ordered = function(){
+        console.log('ordered');
       }
     }
 	  return pc;
 	}
+
   function createDataChannel(pc,json){
     var dataChannel =  pc.createDataChannel(json.name,{reliable: false});
     dataChannel.onerror = function (error) {
@@ -171,15 +178,7 @@ $(function(){
       delete dataChannelJson[this.label]
       console.log('close');
     };
-    dataChannel.onbufferedamountlow = function(){
-      console.log('onbufferedamountlow');
-    };
-    dataChannel.ordered = function(){
-      console.log('ordered');
-    }
-    dataChannel.onmessage = function(event){
-      console.log(event,2222);
-    }
+    
     dataChannelJson[json.name] = dataChannel;
   }
 })
