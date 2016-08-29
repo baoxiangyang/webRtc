@@ -166,12 +166,12 @@ $(function(){
 	}
 
   function createDataChannel(pc,json){
-    var dataChannel =  pc.createDataChannel(json.name,{reliable: false});
+    var dataChannel =  pc.createDataChannel(json.name,{reliable: true,protocol:true});
     dataChannel.onerror = function (error) {
       console.log("Data Channel Error:", error);
     };
     dataChannel.onopen = function (event) {
-      dataChannel.send('11111');
+      //dataChannel.send('11111');
       console.log('hello world');
     };
     dataChannel.onclose = function(){
